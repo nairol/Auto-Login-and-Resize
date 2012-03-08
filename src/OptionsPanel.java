@@ -131,6 +131,14 @@ public class OptionsPanel extends JDialog
         else
         	stateNormal.setSelected(true);
         /* <<< Auto Resize */
+        /* RAM Mod >>> */
+        JPanel ramPanel = new JPanel();
+        final JTextField ramField = new JTextField( LauncherOptions.get("Java-RAM", "1024"), 4 );
+        ramPanel.add(ramField, "West");
+        ramPanel.add(new JLabel("Megabytes   (Default: 1024)"), "Center");
+        jpanel2.add(new JLabel("Max. allocated memory:", 4));
+        jpanel3.add(ramPanel);
+        /* <<< RAM Mod */
         JPanel jpanel4 = new JPanel(new BorderLayout());
         jpanel4.add(new JPanel(), "Center");
         JButton jbutton = new JButton("Done");
@@ -148,6 +156,11 @@ public class OptionsPanel extends JDialog
             	if( stateFullscreen.isSelected() )
             		javax.swing.JOptionPane.showMessageDialog(OptionsPanel.this, "You have selected fullscreen mode.\nThis window mode has some limitations at the moment because of a bug in Minecraft.\nYou will not be able to leave it with F11, for example.", "Fullscreen mode", JOptionPane.INFORMATION_MESSAGE);
             	/* <<< Auto Resize */
+                /* RAM Mod >>> */
+            	if( ramField.getText().equals( LauncherOptions.get("Java-RAM", "1024") ) == false )
+            		javax.swing.JOptionPane.showMessageDialog(OptionsPanel.this, "You have changed the maximum allocated memory.\nPlease restart the launcher for this setting to take effect.", "Max. memory allocation changed", JOptionPane.INFORMATION_MESSAGE);
+                LauncherOptions.set("Java-RAM", ramField.getText() );
+                /* <<< RAM Mod */
                 setVisible(false);
             }
 

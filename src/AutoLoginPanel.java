@@ -77,7 +77,7 @@ public class AutoLoginPanel extends LoginForm
     	else
     	{
 	        setPreferredSize( new Dimension(854, 480));
-	        super.setNoNetwork();
+	        super.setNoNetwork(false);
     	}
     }
     

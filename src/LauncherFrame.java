@@ -1,166 +1,146 @@
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
-
 package net.minecraft;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-// Referenced classes of package net.minecraft:
-//            LoginForm, Launcher, Util
-
 public class LauncherFrame extends Frame
 {
+    public static final int VERSION = 13;
+    private static final long serialVersionUID = 1L;
+    public Map customParameters = new HashMap();
+    public Launcher launcher;
+    public LoginForm loginForm;
 
     public LauncherFrame()
     {
         super("Minecraft Launcher");
-        customParameters = new HashMap();
-        setBackground(Color.BLACK);
-        loginForm = new LoginForm(this);
-        JPanel jpanel = new JPanel();
-        jpanel.setLayout(new BorderLayout());
+        this.setBackground(Color.BLACK);
+        this.loginForm = new LoginForm(this);
+        JPanel var1 = new JPanel();
+        var1.setLayout(new BorderLayout());
+        
         /* Auto login >>> */
         if( AutoLoginPanel.isAutoLoginEnabled() )
         {
             loginForm = new AutoLoginPanel(this);
-            jpanel.setPreferredSize(new Dimension(300, 120));
+            var1.setPreferredSize(new Dimension(300, 120));
         }
         else
         {
             loginForm = new LoginForm(this);
-            jpanel.setPreferredSize(new Dimension(854, 480));
+            var1.setPreferredSize(new Dimension(854, 480));
         }
-        jpanel.add(loginForm, "Center");
+        var1.add(loginForm, "Center");
         /* <<< Auto login */
-        setLayout(new BorderLayout());
-        add(jpanel, "Center");
-        pack();
-        setLocationRelativeTo(null);
+        
+        this.setLayout(new BorderLayout());
+        this.add(var1, "Center");
+        this.pack();
+        this.setLocationRelativeTo((Component)null);
+
         try
         {
-            setIconImage(ImageIO.read((net.minecraft.LauncherFrame.class).getResource("favicon.png")));
+            this.setIconImage(ImageIO.read(LauncherFrame.class.getResource("favicon.png")));
         }
-        catch(IOException ioexception)
+        catch (IOException var3)
         {
-            ioexception.printStackTrace();
+            var3.printStackTrace();
         }
-        addWindowListener(new WindowAdapter() {
 
-            public void windowClosing(WindowEvent windowevent)
-            {
-                (new Thread() {
-
-                    public void run()
-                    {
-                        try
-                        {
-                            Thread.sleep(30000L);
-                        }
-                        catch(InterruptedException interruptedexception)
-                        {
-                            interruptedexception.printStackTrace();
-                        }
-                        System.out.println("FORCING EXIT!");
-                        System.exit(0);
-                    }
-
-                }
-).start();
-                if(launcher != null)
-                {
-                    launcher.stop();
-                    launcher.destroy();
-                }
-                System.exit(0);
-            }
-
-        }
-);
+        this.addWindowListener(new LauncherFrame$1(this));
         /* Auto Resize >>> */
-        addComponentListener(new ComponentAdapter() {
-        	public void componentResized(ComponentEvent e)
-        	{
-        		AutoResize.resized(LauncherFrame.this);
-        	}
-        });
+        this.addComponentListener(new LauncherFrame$2(this));
         /* <<< Auto Resize */
     }
 
-    public void playCached(String s)
+    public void playCached(String var1, boolean var2)
     {
         try
         {
-            if(s == null || s.length() <= 0)
+            if (var1 == null || var1.length() <= 0)
             {
-                s = "Player";
+                var1 = "Player";
             }
-            launcher = new Launcher();
-            launcher.customParameters.putAll(customParameters);
-            launcher.customParameters.put("userName", s);
-            launcher.init();
-            removeAll();
-            add(launcher, "Center");
-            validate();
+
+            this.launcher = new Launcher();
+            this.launcher.customParameters.putAll(this.customParameters);
+            this.launcher.customParameters.put("userName", var1);
+            this.launcher.customParameters.put("demo", "" + var2);
+            this.launcher.customParameters.put("sessionId", "1");
+            this.launcher.init();
+            this.removeAll();
+            this.add(this.launcher, "Center");
+            this.validate();
             /* AutoResize >>> */
             AutoResize.prepareForLaunch(this);
             /* <<< AutoResize */
-            launcher.start();
-            loginForm = null;
-            setTitle("Minecraft");
+            this.launcher.start();
+            this.loginForm = null;
+            this.setTitle("Minecraft");
         }
-        catch(Exception exception)
+        catch (Exception var4)
         {
-            exception.printStackTrace();
-            showError(exception.toString());
+            var4.printStackTrace();
+            this.showError(var4.toString());
         }
     }
 
-    public void login(String s, String s1)
+    public void login(String var1, String var2)
     {
         try
         {
-            String s2 = (new StringBuilder("user=")).append(URLEncoder.encode(s, "UTF-8")).append("&password=").append(URLEncoder.encode(s1, "UTF-8")).append("&version=").append(13).toString();
-            String s3 = Util.excutePost("https://login.minecraft.net/", s2);
-            if(s3 == null)
+            HashMap var3 = new HashMap();
+            var3.put("user", var1);
+            var3.put("password", var2);
+            var3.put("version", Integer.valueOf(13));
+            String var4 = Util.executePost("https://login.minecraft.net/", (Map)var3);
+
+            if (var4 == null)
             {
-                showError("Can't connect to minecraft.net");
-                loginForm.setNoNetwork();
+                this.showError("Can\'t connect to minecraft.net");
+                this.loginForm.setNoNetwork(false);
                 return;
             }
-            if(!s3.contains(":"))
+
+            if (!var4.contains(":"))
             {
-                if(s3.trim().equals("Bad login"))
+                boolean var7 = false;
+
+                if (var4.trim().equals("Bad login"))
                 {
-                    showError("Login failed");
-                } else
-                if(s3.trim().equals("Old version"))
-                {
-                    loginForm.setOutdated();
-                    showError("Outdated launcher");
-                } else
-                {
-                    showError(s3);
+                    this.showError("Login failed");
                 }
-                loginForm.setNoNetwork();
+                else if (var4.trim().equals("Old version"))
+                {
+                    this.loginForm.setOutdated();
+                    this.showError("Outdated launcher");
+                }
+                else if (var4.trim().equals("User not premium"))
+                {
+                    this.showError(var4);
+                    var7 = true;
+                }
+                else
+                {
+                    this.showError(var4);
+                }
+
+                this.loginForm.setNoNetwork(var7);
                 return;
             }
-            String as[] = s3.split(":");
+
+            String[] var5 = var4.split(":");
             /* Auto login >>> */
             if( AutoLoginPanel.abortLogin ) // If the user pressed Esc in the AutoLoginPanel ...
             {
@@ -169,38 +149,38 @@ public class LauncherFrame extends Frame
                 return;        // ... and don't continue here.
             }
             /* <<< Auto login */
-            launcher = new Launcher();
-            launcher.customParameters.putAll(customParameters);
-            launcher.customParameters.put("userName", as[2].trim());
-            launcher.customParameters.put("latestVersion", as[0].trim());
-            launcher.customParameters.put("downloadTicket", as[1].trim());
-            launcher.customParameters.put("sessionId", as[3].trim());
-            launcher.init();
-            removeAll();
-            add(launcher, "Center");
-            validate();
+            this.launcher = new Launcher();
+            this.launcher.customParameters.putAll(this.customParameters);
+            this.launcher.customParameters.put("userName", var5[2].trim());
+            this.launcher.customParameters.put("latestVersion", var5[0].trim());
+            this.launcher.customParameters.put("downloadTicket", var5[1].trim());
+            this.launcher.customParameters.put("sessionId", var5[3].trim());
+            this.launcher.init();
+            this.removeAll();
+            this.add(this.launcher, "Center");
+            this.validate();
             /* AutoResize >>> */
             AutoResize.prepareForLaunch(this);
             /* <<< AutoResize */
-            launcher.start();
-            loginForm.loginOk();
-            loginForm = null;
-            setTitle("Minecraft");
+            this.launcher.start();
+            this.loginForm.loginOk();
+            this.loginForm = null;
+            this.setTitle("Minecraft");
         }
-        catch(Exception exception)
+        catch (Exception var6)
         {
-            exception.printStackTrace();
-            showError(exception.toString());
-            loginForm.setNoNetwork();
+            var6.printStackTrace();
+            this.showError(var6.toString());
+            this.loginForm.setNoNetwork(false);
         }
     }
 
-    private void showError(String s)
+    private void showError(String var1)
     {
         /* Auto login >>> */
-    	if( s.equals("Login failed") && AutoLoginPanel.retryCount > 0 )
+    	if( var1.equals("Login failed") && AutoLoginPanel.retryCount > 0 )
     	{
-    		loginForm.setError(s);
+    		loginForm.setError(var1);
     		return;
     	}
         removeAll();
@@ -208,8 +188,8 @@ public class LauncherFrame extends Frame
         if( loginForm instanceof AutoLoginPanel )
             loginForm = new LoginForm(this);
         add(loginForm);
-        if( s.isEmpty() == false )
-            loginForm.setError(s);
+        if( var1.isEmpty() == false )
+            loginForm.setError(var1);
         validate();
         loginForm.setPreferredSize( new Dimension(854, 480) );
         pack();
@@ -217,51 +197,84 @@ public class LauncherFrame extends Frame
         /* <<< Auto login */
     }
 
-    public boolean canPlayOffline(String s)
+    public boolean canPlayOffline(String var1)
     {
-        Launcher launcher1 = new Launcher();
-        launcher1.customParameters.putAll(customParameters);
-        launcher1.init(s, null, null, null);
-        return launcher1.canPlayOffline();
+        Launcher var2 = new Launcher();
+        var2.customParameters.putAll(this.customParameters);
+        var2.init(var1, (String)null, (String)null, "1");
+        return var2.canPlayOffline();
     }
 
-    public static void main(String args[])
+    public static void main(String[] var0)
     {
         try
         {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
-        catch(Exception exception) { }
-        LauncherFrame launcherframe = new LauncherFrame();
-        launcherframe.setVisible(true);
-        launcherframe.customParameters.put("stand-alone", "true");
-        if(args.length >= 3)
+        catch (Exception var8)
         {
-            String s = args[2];
-            String s1 = "25565";
-            if(s.contains(":"))
-            {
-                String args1[] = s.split(":");
-                s = args1[0];
-                s1 = args1[1];
-            }
-            launcherframe.customParameters.put("server", s);
-            launcherframe.customParameters.put("port", s1);
+            ;
         }
-        if(args.length >= 1)
+
+        System.out.println("asdf");
+        System.setProperty("java.net.preferIPv4Stack", "true");
+        System.setProperty("java.net.preferIPv6Addresses", "false");
+        LauncherFrame var1 = new LauncherFrame();
+        var1.setVisible(true);
+        var1.customParameters.put("stand-alone", "true");
+        String var2 = null;
+        String var3 = null;
+        String[] var4 = var0;
+        int var5 = var0.length;
+
+        for (int var6 = 0; var6 < var5; ++var6)
         {
-            launcherframe.loginForm.userName.setText(args[0]);
-            if(args.length >= 2)
+            String var7 = var4[var6];
+
+            if (!var7.startsWith("-u=") && !var7.startsWith("--user="))
             {
-                launcherframe.loginForm.password.setText(args[1]);
-                launcherframe.loginForm.doLogin();
+                if (!var7.startsWith("-p=") && !var7.startsWith("--password="))
+                {
+                    if (var7.startsWith("--noupdate"))
+                    {
+                        var1.customParameters.put("noupdate", "true");
+                    }
+                }
+                else
+                {
+                    var3 = getArgValue(var7);
+                    var1.customParameters.put("password", var3);
+                    var1.loginForm.password.setText(var3);
+                }
             }
+            else
+            {
+                var2 = getArgValue(var7);
+                var1.customParameters.put("username", var2);
+                var1.loginForm.userName.setText(var2);
+            }
+        }
+
+        if (var0.length >= 3)
+        {
+            String var9 = var0[2];
+            String var10 = "25565";
+
+            if (var9.contains(":"))
+            {
+                String[] var11 = var9.split(":");
+                var9 = var11[0];
+                var10 = var11[1];
+            }
+
+            var1.customParameters.put("server", var9);
+            var1.customParameters.put("port", var10);
         }
     }
 
-    public static final int VERSION = 13;
-    private static final long serialVersionUID = 1L;
-    public Map customParameters;
-    public Launcher launcher;
-    public LoginForm loginForm;
+    private static String getArgValue(String var0)
+    {
+        int var1 = var0.indexOf(61);
+        return var1 < 0 ? "" : var0.substring(var1 + 1);
+    }
 }

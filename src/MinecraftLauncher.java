@@ -1,66 +1,68 @@
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
-
 package net.minecraft;
 
-import java.net.URI;
-import java.net.URL;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.util.ArrayList;
-
-// Referenced classes of package net.minecraft:
-//            LauncherFrame
+import net.minecraft.Util$OS;
 
 public class MinecraftLauncher
 {
+    private static final int MIN_HEAP = 511;
+    private static final int RECOMMENDED_HEAP = 1024;
 
-    public MinecraftLauncher()
+    public static void main(String[] var0) throws Exception
     {
-    }
+        float var1 = (float)(Runtime.getRuntime().maxMemory() / 1024L / 1024L);
 
-    public static void main(String args[])
-        throws Exception
-    {
-        float f = Runtime.getRuntime().maxMemory() / 1024L / 1024L;
-        if(f > 511F)
+        /* RAM mod >>> */
+        if ( var1 > 511.0F && LauncherOptions.get("Java-RAM", "").isEmpty() )
+        /* <<< RAM mod */
         {
-            LauncherFrame.main(args);
-        } else
+            LauncherFrame.main(var0);
+        }
+        else
         {
             try
             {
-                String s = (net.minecraft.MinecraftLauncher.class).getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-                ArrayList arraylist = new ArrayList();
-                arraylist.add("javaw");
-                /* Auto login >>> */
-                //arraylist.add("-Xmx1024m");
-                arraylist.add("-Xmx" + LauncherOptions.get("Java-RAM", "1024") + "m");
-                /* <<< Auto login */
-                arraylist.add("-Dsun.java2d.noddraw=true");
-                arraylist.add("-Dsun.java2d.d3d=false");
-                arraylist.add("-Dsun.java2d.opengl=false");
-                arraylist.add("-Dsun.java2d.pmoffscreen=false");
-                arraylist.add("-classpath");
-                arraylist.add(s);
-                arraylist.add("net.minecraft.LauncherFrame");
-                ProcessBuilder processbuilder = new ProcessBuilder(arraylist);
-                Process process = processbuilder.start();
-                if(process == null)
+                String var2 = MinecraftLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+                ArrayList var3 = new ArrayList();
+
+                if (Util.getPlatform().equals(Util$OS.WINDOWS))
+                {
+                    var3.add("javaw");
+                }
+                else
+                {
+                    var3.add("java");
+                }
+
+                /* RAM mod >>> */
+                String maxMemory = LauncherOptions.get("Java-RAM", "");
+                if( maxMemory.isEmpty() )
+                	var3.add("-Xmx1024m");
+                else
+                	var3.add("-Xmx" + maxMemory + "m");
+                /* <<< RAM mod */
+                var3.add("-Dsun.java2d.noddraw=true");
+                var3.add("-Dsun.java2d.d3d=false");
+                var3.add("-Dsun.java2d.opengl=false");
+                var3.add("-Dsun.java2d.pmoffscreen=false");
+                var3.add("-classpath");
+                var3.add(var2);
+                var3.add("net.minecraft.LauncherFrame");
+                ProcessBuilder var4 = new ProcessBuilder(var3);
+                Process var5 = var4.start();
+
+                if (var5 == null)
                 {
                     throw new Exception("!");
                 }
+
                 System.exit(0);
             }
-            catch(Exception exception)
+            catch (Exception var6)
             {
-                exception.printStackTrace();
-                LauncherFrame.main(args);
+                var6.printStackTrace();
+                LauncherFrame.main(var0);
             }
         }
     }
-
-    private static final int MIN_HEAP = 511;
-    private static final int RECOMMENDED_HEAP = 1024;
 }

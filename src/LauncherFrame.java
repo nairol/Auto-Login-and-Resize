@@ -270,6 +270,10 @@ public class LauncherFrame extends Frame
             var1.customParameters.put("server", var9);
             var1.customParameters.put("port", var10);
         }
+        /* Auto login >>> */
+        if( var1.loginForm instanceof AutoLoginPanel )
+        	var1.loginForm.doLogin();
+        /* <<< Auto login */
     }
 
     private static String getArgValue(String var0)

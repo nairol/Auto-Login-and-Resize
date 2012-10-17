@@ -41,14 +41,15 @@ public class AutoLoginPanel extends LoginForm
         
         addKeyListener( new EscKeyListener() );
         setFocusable(true);
-        doLogin();
     }
     
+    @Override
     public void setLoggingIn()
     {
         infoLabel.setText("For options press Esc.");
     }
     
+    @Override
     public void setError(String s)
     {
     	if( s.equals("Login failed") && retryCount > 0 )
@@ -62,13 +63,14 @@ public class AutoLoginPanel extends LoginForm
     	}
     }
     
-    public void setNoNetwork()
+    @Override
+    public void setNoNetwork( boolean var1 )
     {
     	if( retryCount > 0 )
     	{
 			try
 			{
-				Thread.sleep(2000);
+				Thread.sleep(3000);
 			}
 			catch (InterruptedException e) { }
 			retryCount--;
@@ -76,8 +78,8 @@ public class AutoLoginPanel extends LoginForm
     	}
     	else
     	{
-	        setPreferredSize( new Dimension(854, 480));
-	        super.setNoNetwork(false);
+	        setPreferredSize( new Dimension(854, 480) );
+	        super.setNoNetwork( var1 );
     	}
     }
     

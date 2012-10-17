@@ -1,5 +1,7 @@
 package net.minecraft;
 
+import java.io.PrintStream;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
 import net.minecraft.Util$OS;
 
@@ -48,14 +50,22 @@ public class MinecraftLauncher
                 var3.add("-classpath");
                 var3.add(var2);
                 var3.add("net.minecraft.LauncherFrame");
+                /* Bugfix >>> */
+                for( String s : var0 )
+                	var3.add( s );
+                /* <<< Bugfix */
                 ProcessBuilder var4 = new ProcessBuilder(var3);
+                /* Bugfix >>> */
+                var4.redirectOutput(Redirect.INHERIT);
+                var4.redirectError(Redirect.INHERIT);
+                /* <<< Bugfix */
                 Process var5 = var4.start();
 
                 if (var5 == null)
                 {
                     throw new Exception("!");
                 }
-
+                
                 System.exit(0);
             }
             catch (Exception var6)
